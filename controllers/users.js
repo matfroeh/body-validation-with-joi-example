@@ -1,24 +1,24 @@
 import Post from '../models/Post.js';
 import User from '../models/User.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import ErrorResponse from '../utils/ErrorResponse.js';
 
-export const getUsers = async (req, res) => {
+export const getUsers = asyncHandler( async (req, res) => {
   const users = await User.findAll();
   res.json(users);
-};
+});
 
-export const createUser = async (req, res) => {
+export const createUser = asyncHandler( async (req, res) => {
   const {
     body: { firstName, lastName, email }
   } = req;
-  if (!firstName || !lastName || !email)
-    throw new Error('firstName, lastName, and email are required');
   const found = await User.findOne({ where: { email } });
-  if (found) throw new Error('User with that email already exists');
+  if (found) throw new ErrorResponse('User with that email already exists');
   const user = await User.create(req.body);
   res.json(user);
-};
+});
 
-export const getUserById = async (req, res) => {
+export const getUserById = asyncHandler( async (req, res) => {
   try {
     const {
       params: { id }
@@ -29,27 +29,25 @@ export const getUserById = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+});
 
-export const updateUser = async (req, res) => {
+export const updateUser = asyncHandler( async (req, res) => {
   const {
     body: { firstName, lastName, email },
     params: { id }
   } = req;
-  if (!firstName || !lastName || !email)
-    throw new Error('firstName, lastName, and email are required');
   const user = await User.findByPk(id);
-  if (!user) throw new Error('User not found');
+  if (!user) throw new ErrorResponse('User not found');
   await user.update(req.body);
   res.json(user);
-};
+});
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = asyncHandler( async (req, res) => {
   const {
     params: { id }
   } = req;
   const user = await User.findByPk(id);
-  if (!user) throw new Error('User not found');
+  if (!user) throw new ErrorResponse('User not found');
   await user.destroy();
   res.json({ message: 'User deleted' });
-};
+});
